@@ -1,235 +1,149 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import AudioPlayer from "@/components/AudioPlayer";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import MusicToggle from "@/components/MusicToggle";
+import ThemeLogo from "@/components/ThemeLogo";
+import InquireButton from "@/components/InquireButton";
 
 export default function Navbar() {
-  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [hireOpen, setHireOpen] = useState(false);
-  const [briefCopied, setBriefCopied] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
 
-  const copyProjectBrief = () => {
-    if (typeof navigator === "undefined") return;
-    navigator.clipboard.writeText("Project inquiry: I want to hire Krishna for thumbnails, Discord bots, or a cinematic portfolio UI.").then(() => {
-      setBriefCopied(true);
-      setTimeout(() => setBriefCopied(false), 1800);
-    });
-  };
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const onScroll = () => {
+      setScrolled(window.scrollY > 50);
+      
+      const sections = ["home", "about", "process", "skills", "contact"];
+      const current = sections.find(section => {
+        const el = document.getElementById(section);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          return rect.top <= 100 && rect.bottom >= 100;
+        }
+        return false;
+      });
+      if (current) setActiveSection(current);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const links = [
-    { name: "Home", href: "/" },
-    { name: "Thumbnails", href: "/thumbnails" },
-    { name: "Bots", href: "/bots" },
+    { name: "Home", href: "/#home", id: "home" },
+    { name: "About", href: "/#about", id: "about" },
+    { name: "Process", href: "/#process", id: "process" },
+    { name: "Gallery", href: "/thumbnails", id: "gallery" },
+    { name: "Contact", href: "/#contact", id: "contact" },
   ];
 
   return (
     <>
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-6xl rounded-full border border-white/10 bg-surface-container/20 backdrop-blur-3xl shadow-2xl z-[100] flex justify-between items-center px-5 py-2.5 transition-all duration-300">
-        {/* Left Side: Brand Logo */}
-        <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className="font-display text-xl font-bold tracking-tighter text-on-surface hover:text-primary transition-colors duration-300"
-          >
-            KRISHNA
-          </Link>
+      <nav className={`fixed top-10 left-1/2 z-[100] flex w-[90%] max-w-7xl -translate-x-1/2 items-center justify-between rounded-full border border-white/5 bg-black/20 px-6 py-4 backdrop-blur-3xl transition-all duration-1000 md:px-10 ${scrolled ? "top-6 !w-[95%] bg-black/40 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)]" : ""}`}>
+        <div className="flex items-center gap-10">
+          <ThemeLogo />
+          <div className="hidden h-8 w-px bg-white/10 md:block" />
+          <span className="hidden font-ui text-[8px] uppercase tracking-[0.6em] text-gold/40 md:block">
+            Lord Anos Voldigoad
+          </span>
         </div>
 
-        {/* Center: Persistent Navigation Links */}
-        <ul className="hidden md:flex items-center gap-1.5 relative">
-          {links.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <li key={link.href} className="relative">
-                <Link
-                  href={link.href}
-                  className={`relative font-ui text-[12px] uppercase tracking-widest px-4 py-2 rounded-full block transition-colors duration-300 ${
-                    isActive ? "text-primary" : "text-on-surface-variant/75 hover:text-on-surface"
-                  }`}
-                >
-                  {isActive && (
-                    <motion.span
-                      layoutId="activeNavBackground"
-                      className="absolute inset-0 bg-white/5 rounded-full border border-primary/20 shadow-[0_0_15px_rgba(215,186,255,0.08)] -z-10"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  {link.name}
-                </Link>
-              </li>
-            );
-          })}
+        <ul className="hidden lg:flex items-center gap-4">
+          {links.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className={`relative px-5 py-2 font-ui text-[9px] uppercase tracking-[0.3em] transition-all duration-500 hover:text-gold ${activeSection === link.id ? "text-gold" : "text-cream-soft"}`}
+              >
+                {link.name}
+                {activeSection === link.id && (
+                  <motion.span
+                    layoutId="active-indicator"
+                    className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gold shadow-[0_0_10px_rgba(var(--secondary-color-rgb),0.8)]"
+                  />
+                )}
+              </Link>
+            </li>
+          ))}
         </ul>
 
-        {/* Right Side: Media, Theme Settings, and Profile Avatar */}
-        <div className="flex items-center gap-3">
-          
-          {/* Audio Equalizer Player */}
-          <AudioPlayer />
-          
-          {/* Palette Accent Switcher */}
-          <ThemeSwitcher />
+        <div className="flex items-center gap-8">
+          <div className="hidden h-8 w-px bg-white/10 md:block" />
+          <MusicToggle />
+          <InquireButton className="hidden md:flex !px-8 !py-3.5" label="Inquire" />
 
-          <button
-            onClick={() => setHireOpen(true)}
-            className="hidden lg:flex items-center gap-2 font-ui text-[10px] uppercase tracking-widest text-primary border border-primary/30 px-5 py-2.5 rounded-full hover:bg-primary/10 hover:shadow-[0_0_28px_rgba(215,186,255,0.18)] transition-all duration-300 active:scale-95 cursor-pointer"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_12px_var(--primary-color)]" />
-            Hire Me
-          </button>
-          
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 select-none hidden md:block">
-            <img
-              alt="Krishna Portfolio Avatar"
-              className="w-full h-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEQuC9ynZupEDzmjA9PlblcMfOgnJA9FXHzZgUybvkViqtAs4cm-csnXTQxCZeNlA3YrVCOwp6e14kCtZqRybzkC7rMnPf-lKqPeFiqCR_DInTsIp2_NpS5_HXXSyhEI710lYmpARF2mnhGHbBi3tt7_tQ6dEPi1km4nUlEmdApRM7SBi-lcPkU5AGpya90KnhBqyWYcKffK0hIi8I4ZjaXlDGjvo7ypar4tePTcc15_KOx6yokBxJRARRS78xCImA2abUP1LJXVbI"
-            />
-          </div>
-
-          {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-on-surface-variant hover:text-primary transition-colors p-2"
-            aria-label="Toggle menu"
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 text-cream-soft transition-all duration-500 hover:border-gold/40 hover:text-gold lg:hidden"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {mobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16m-7 6h7"
-                />
-              )}
-            </svg>
+            <div className="flex flex-col gap-1.5 items-end">
+               <span className={`h-px bg-current transition-all ${mobileMenuOpen ? "w-6 rotate-45 translate-y-1.5" : "w-6"}`} />
+               <span className={`h-px bg-current transition-all ${mobileMenuOpen ? "opacity-0" : "w-4"}`} />
+               <span className={`h-px bg-current transition-all ${mobileMenuOpen ? "w-6 -rotate-45 -translate-y-1" : "w-5"}`} />
+            </div>
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu Panel */}
+      {/* Mobile Nav Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 w-[92%] glass-panel rounded-2xl z-[90] p-6 flex flex-col gap-4 shadow-2xl md:hidden"
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[110] flex flex-col bg-background-void/98 backdrop-blur-3xl lg:hidden"
           >
-            <ul className="flex flex-col gap-3">
-              {links.map((link) => {
-                const isActive = pathname === link.href;
-                return (
-                  <li key={link.href}>
+             <div className="flex items-center justify-between p-10">
+                <ThemeLogo />
+                <button onClick={() => setMobileMenuOpen(false)} className="h-14 w-14 rounded-full border border-white/10 flex items-center justify-center text-cream">
+                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth={1.5} /></svg>
+                </button>
+             </div>
+             
+             <ul className="flex flex-col gap-6 px-10 mt-20">
+                {links.map((link, i) => (
+                  <motion.li
+                    key={link.href}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 + 0.3 }}
+                  >
                     <Link
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`font-ui text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl block transition-all duration-300 ${
-                        isActive
-                          ? "text-primary bg-white/5 border border-primary/20"
-                          : "text-on-surface-variant hover:text-on-surface hover:bg-white/5"
-                      }`}
+                      className="text-4xl font-display italic text-cream hover:text-gold transition-colors"
                     >
                       {link.name}
                     </Link>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="h-px bg-white/10 w-full my-2" />
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setHireOpen(true);
-              }}
-              className="w-full font-ui text-[10px] uppercase tracking-widest text-primary border border-primary/30 py-3 rounded-xl hover:bg-primary/10 transition-all duration-300"
-            >
-              Hire Me
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {hireOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[240] flex items-start justify-center bg-black/70 px-4 pt-24 backdrop-blur-md"
-            onClick={() => setHireOpen(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-primary/20 bg-[#0d0a10]/95 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.85)]"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
-              <button
-                onClick={() => setHireOpen(false)}
-                className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-ui text-[9px] uppercase tracking-[0.18em] text-white/60 transition hover:text-primary"
-              >
-                Close
-              </button>
-
-              <p className="font-ui text-[9px] uppercase tracking-[0.32em] text-primary/80">
-                Commission Console
-              </p>
-              <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight text-white">
-                Build something cinematic.
-              </h2>
-              <p className="mt-3 max-w-md text-sm leading-7 text-on-surface-variant/70">
-                Thumbnail design, Discord bot systems, portfolio UI, and motion-heavy web experiences.
-              </p>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                {["Thumbnails", "Discord Bots", "Portfolio UI"].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-center font-ui text-[10px] uppercase tracking-[0.18em] text-white/70"
-                  >
-                    {item}
-                  </div>
+                  </motion.li>
                 ))}
-              </div>
-
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <button
-                  onClick={copyProjectBrief}
-                  className="flex-1 rounded-full border border-primary/30 bg-primary/10 px-5 py-3 text-center font-ui text-[10px] uppercase tracking-[0.2em] text-primary transition hover:bg-primary/20 hover:shadow-[0_0_32px_rgba(215,186,255,0.18)]"
+                
+                {/* Mobile Inquire Action */}
+                <motion.li
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: links.length * 0.1 + 0.3 }}
+                  className="mt-6 pt-6 border-t border-white/5"
                 >
-                  {briefCopied ? "Brief Copied" : "Copy Brief"}
-                </button>
-                <a
-                  href="https://github.com/krishna3251"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 rounded-full border border-white/10 bg-white/[0.03] px-5 py-3 text-center font-ui text-[10px] uppercase tracking-[0.2em] text-white/70 transition hover:border-primary/30 hover:text-white"
-                >
-                  GitHub
-                </a>
-              </div>
-            </motion.div>
+                  <InquireButton 
+                    label="Start Project" 
+                    className="w-full !py-4 text-center justify-center font-ui text-[10px] tracking-[0.3em] font-semibold"
+                  />
+                </motion.li>
+             </ul>
+             
+             <div className="mt-auto p-10 border-t border-white/5 flex items-center justify-between">
+                <MusicToggle />
+                <span className="font-ui text-[8px] uppercase tracking-[0.5em] text-gold/40">Raj H Chavda</span>
+             </div>
           </motion.div>
         )}
       </AnimatePresence>

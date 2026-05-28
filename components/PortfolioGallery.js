@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SectionHeader from "@/components/SectionHeader";
 import InquireButton from "@/components/InquireButton";
 
-const classicOrder = [1, 10, 14, 3, 20, 7, 12, 17, 5, 22, 9, 15, 2, 18, 11, 23, 4, 19, 6, 13, 8, 16, 21];
+const classicOrder = [1, 10, 14, 3, 20, 7, 12, 17, 5, 22, 9, 15, 2, 18, 11, 23, 24, 4, 19, 6, 13, 8, 16, 21];
 const aiOrder = [1, 5, 2, 7, 3, 6, 4];
 
 const classicPosters = classicOrder.map((number) => ({

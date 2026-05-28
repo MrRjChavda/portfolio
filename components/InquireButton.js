@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+const inquiryMailto =
+  "mailto:rajchavda120039@gmail.com?subject=Project%20Inquiry%20-%20Creative%20Collaboration&body=Hello%20Raj%20H%20Chavda,%0A%0AI%20would%20like%20to%20discuss%20a%20creative%20project.%0A%0AProject%20Type:%0ABudget:%0ATimeline:%0A%0ABest%20regards,";
+
 export default function InquireButton({ className = "", label = "Inquire Project" }) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [mouseCoords, setMouseCoords] = useState({ x: 0, y: 0 });
@@ -38,10 +41,7 @@ export default function InquireButton({ className = "", label = "Inquire Project
 
     setRipples((prev) => [...prev, newRipple]);
 
-    // Dispatch custom event to trigger global transition after showing ripple slightly
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("trigger-inquiry-redirect"));
-    }, 150);
+    window.dispatchEvent(new CustomEvent("trigger-inquiry-redirect"));
   };
 
   useEffect(() => {
@@ -54,8 +54,8 @@ export default function InquireButton({ className = "", label = "Inquire Project
   }, [ripples]);
 
   return (
-    <motion.button
-      type="button"
+    <motion.a
+      href={inquiryMailto}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
@@ -111,6 +111,6 @@ export default function InquireButton({ className = "", label = "Inquire Project
       
       {/* Subtle border illumination on hover */}
       <div className="absolute inset-0 rounded-full border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-30" />
-    </motion.button>
+    </motion.a>
   );
 }

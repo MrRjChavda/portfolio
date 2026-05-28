@@ -118,12 +118,6 @@ function Lightbox({ index, items, onClose, onNext, onPrev }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
 
-  // Reset scale and pan when changing images
-  useEffect(() => {
-    setScale(1);
-    setPan({ x: 0, y: 0 });
-  }, [index]);
-
   // Bind keyboard inputs
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -341,8 +335,8 @@ export default function PortfolioGallery() {
 
   // Set client mount flag
   useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
+    const mountFrame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(mountFrame);
   }, []);
 
 
@@ -359,7 +353,7 @@ export default function PortfolioGallery() {
             </div>
             <h2 className="font-display text-4xl md:text-5xl italic text-cream leading-tight">Featured Showcase</h2>
             <p className="mt-4 text-cream-soft/60 text-sm leading-relaxed">
-              The premier cinematic thumbnail: "Editing With Lord Anos Voldigoad Is Live". Engineered for high-end engagement, lighting depth, and color psychology.
+              The premier cinematic thumbnail: &quot;Editing With Lord Anos Voldigoad Is Live&quot;. Engineered for high-end engagement, lighting depth, and color psychology.
             </p>
           </div>
         </div>
@@ -424,6 +418,7 @@ export default function PortfolioGallery() {
         {activeItemIndex !== null && mounted && typeof window !== "undefined" && (
           createPortal(
             <Lightbox
+              key={activeItemIndex}
               index={activeItemIndex}
               items={allItems}
               onClose={() => setActiveItemIndex(null)}

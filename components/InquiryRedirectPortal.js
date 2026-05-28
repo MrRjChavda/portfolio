@@ -9,13 +9,13 @@ export default function InquiryRedirectPortal() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    
+    const mountFrame = requestAnimationFrame(() => setMounted(true));
+
     const handleTrigger = () => {
       setActive(true);
-      
+
       const mailtoUrl = "mailto:rajchavda120039@gmail.com?subject=Project%20Inquiry%20-%20Creative%20Collaboration&body=Hello%20Raj%20H%20Chavda,%0A%0AI%20would%20like%20to%20discuss%20a%20creative%20project.%0A%0AProject%20Type:%0ABudget:%0ATimeline:%0A%0ABest%20regards,";
-      
+
       // Delay to let the transition animate
       setTimeout(() => {
         window.location.href = mailtoUrl;
@@ -27,8 +27,8 @@ export default function InquiryRedirectPortal() {
 
     window.addEventListener("trigger-inquiry-redirect", handleTrigger);
     return () => {
+      cancelAnimationFrame(mountFrame);
       window.removeEventListener("trigger-inquiry-redirect", handleTrigger);
-      setMounted(false);
     };
   }, []);
 
@@ -54,7 +54,7 @@ export default function InquiryRedirectPortal() {
             <h2 className="editorial-header !text-4xl md:!text-5xl italic leading-none">Opening Inquiry Channels</h2>
             <div className="h-px w-24 bg-gold/30 mx-auto" />
             <p className="text-cream-soft/60 text-xs leading-relaxed max-w-sm">
-              Initializing Gmail compose client. If it doesn't open automatically, please check your default mail application.
+              Initializing Gmail compose client. If it does not open automatically, please check your default mail application.
             </p>
             <p className="font-mono text-[9px] text-gold/35 tracking-widest uppercase pt-6">TO: rajchavda120039@gmail.com</p>
           </div>
